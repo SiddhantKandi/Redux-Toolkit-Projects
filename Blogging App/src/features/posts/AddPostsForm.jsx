@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { postAdded } from "./postsSlice.js";
+import { addNewPost } from "./postsSlice.js";
 import { selectAllUsers } from "../users/usersSlice.js";
 
 const AddPostsForm = () => {
@@ -8,6 +8,7 @@ const AddPostsForm = () => {
   const [content, setContent] = useState("");
   const dispatch = useDispatch();
   const [userId, setUserId] = useState("");
+  const [addRequestStatus, setAddRequestStatus] = useState("idle");
 
   const users = useSelector(selectAllUsers);
 
@@ -15,18 +16,28 @@ const AddPostsForm = () => {
   const onContentChanged = (e) => setContent(e.target.value);
   const onUserChanged = (e) => setUserId(e.target.value);
 
-  const saveForm = () => {
-    if (title && content) {
-      dispatch(postAdded(title, content, userId));
-      setTitle("");
-      setContent("");
+  let canSave =
+    [title, content, userId].every(Boolean) && addRequestStatus === "idle";
+
+  const saveForm = async () => {
+    if (canSave) {
+      try {
+        setAddRequestStatus("pending");
+        await dispatch(addNewPost({ title, body: content, userId })).unwrap();
+        setTitle("");
+        setContent("");
+        setUserId("");
+      } catch (error) {
+        alert("Failed to save the post ");
+        console.log("Error is : ", error);
+      } finally {
+        setAddRequestStatus("idle");
+      }
     }
   };
 
-  const canSave = Boolean(title) && Boolean(content) && Boolean(userId)
-
-  const userOptions = users.map((user) => (
-    <option key={user.id} value={user.id}>
+  const userOptions = users.map((user, index) => (
+    <option key={index} value={user.id}>
       {user.name}
     </option>
   ));
@@ -49,7 +60,12 @@ const AddPostsForm = () => {
           className="rounded-md px-2 text-black"
         />
         <label htmlFor="userAdded">User :</label>
-        <select id="User" value={userId} onChange={onUserChanged} className="text-black">
+        <select
+          id="User"
+          value={userId}
+          onChange={onUserChanged}
+          className="text-black"
+        >
           <option value=""></option>
           {userOptions}
         </select>
@@ -63,10 +79,14 @@ const AddPostsForm = () => {
           className="rounded-md px-2 text-black"
         />
         <button
-          className={`bg-green-500 px-3 py-2 max-w-auto mx-auto rounded-lg ${canSave ? "hover:cursor-pointer" : "hover:cursor-not-allowed opacity-50"}`}
+          className={`bg-green-500 px-3 py-2 max-w-auto mx-auto rounded-lg ${
+            canSave
+              ? "hover:cursor-pointer"
+              : "hover:cursor-not-allowed opacity-50"
+          }`}
           onClick={saveForm}
           type="button"
-          disabled = {!canSave}
+          disabled={!canSave}
         >
           Save Post
         </button>

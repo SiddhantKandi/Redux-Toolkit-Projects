@@ -6,9 +6,7 @@ function TimeStamp( {timeStamp }) {
         const date = parseISO(timeStamp);
         const timePeriod = formatDistanceToNow(date);
 
-        console.log("Date is : ",date);
-        console.log("Time Period is ",timePeriod);
-        console.log("Time stamp is : ",timeStamp);
+       
 
         timeAgo = `${timePeriod} ago`
     }
