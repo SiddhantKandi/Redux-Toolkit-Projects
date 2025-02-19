@@ -16,8 +16,26 @@ export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
 });
 
 export const addNewPost = createAsyncThunk('posts/addNewPosts', async (initialPost) => {
-    const response = await axios.post(POST_URL,initialPost);
+    const response = await axios.post(POST_URL, initialPost);
     return response.data;
+})
+
+export const updatePost = createAsyncThunk('posts.updatePost', async (initialPost) => {
+    const { id } = initialPost;
+    console.log("Initial Post is : ", initialPost);
+    const response = await axios.put(`${POST_URL}/${id}`, initialPost);
+    return response.data;
+})
+
+export const deletePost = createAsyncThunk('posts/deletePost', async (initialPost) => {
+    try {
+        const { id } = initialPost;
+        const response = await axios.delete(`${POST_URL}/${id}`, initialPost);
+        if(response?.status === 200) return initialPost;
+        return `${response?.status}: ${response?.statusText}`;
+    } catch (error) {
+        return error.message;
+    }
 })
 
 const postsSlice = createSlice({
@@ -72,7 +90,7 @@ const postsSlice = createSlice({
                         heart: 0,
                         rocket: 0
                     }
-                return post
+                return post;
             },
 
 
@@ -82,18 +100,39 @@ const postsSlice = createSlice({
         ).addCase(fetchPosts.rejected, (state, action) => {
             state.status = 'failed'
             state.error = action.error.message
-        }).addCase(addNewPost.fulfilled, (state,action) => {
+        }).addCase(addNewPost.fulfilled, (state, action) => {
             action.payload.userId = Number(action.payload.userId),
-            action.payload.date = new Date().toISOString(),
-            action.payload.reactions = {
-                thumbsUp: 0,
-                coffee: 0,
-                wow: 0,
-                heart: 0,
-                rocket: 0 
-            },
-            console.log("Action payload is : ",action.payload)
-            state.posts.push(action.payload)
+                action.payload.date = new Date().toISOString(),
+                action.payload.reactions = {
+                    thumbsUp: 0,
+                    coffee: 0,
+                    wow: 0,
+                    heart: 0,
+                    rocket: 0
+                },
+                state.posts.push(action.payload)
+        }).addCase(updatePost.fulfilled, (state, action) => {
+            console.log("Action payload : ", action.payload);
+            if (!action.payload?.id) {
+                console.log("Failed to update the post");
+                return;
+            }
+            const { id } = action.payload;
+            action.payload.date = new Date().toISOString();
+            const posts = state.posts.filter((post) => post.id !== id);
+
+            state.posts = [...posts, action.payload];
+
+        }).addCase(deletePost.fulfilled, (state, action) => {
+            console.log("Action payload in delete : ".action);
+            if (!action.payload?.id) {
+                console.log("Failed to delete the post");
+                return;
+            }
+
+            const { id } = action.payload;
+            const posts = state.posts.filter((post) => post.id !== id);
+            state.posts = posts;
         })
     },
 
@@ -102,6 +141,10 @@ const postsSlice = createSlice({
 export const selectAllPosts = (state) => state.posts.posts;
 export const getPostsStatus = (state) => state.posts.status;
 export const getPostsError = (state) => state.posts.error;
+
+export const selectPostById = (state, postId) => {
+    return state.posts.posts.find(post => post.id === postId);
+}
 
 export const { postAdded, reactionAdded } = postsSlice.actions;
 
