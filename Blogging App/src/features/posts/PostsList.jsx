@@ -1,35 +1,21 @@
 import { useSelector } from "react-redux";
-import {
-  selectAllPosts,
-  getPostsError,
-  getPostsStatus,
-  
-} from "./postsSlice.js";
+import { selectPostIds, getPostsError, getPostsStatus } from "./postsSlice.js";
 
 import PostExcerpt from "./PostsExcerpt.jsx";
 import Spinner from "../../utils/Spinner.jsx";
-import {nanoid} from 'nanoid';
 
 function PostsList() {
- 
-
-  const posts = useSelector(selectAllPosts); // use it to get the required data from the redux store
+  const orderedPostsIds = useSelector(selectPostIds); // use it to get the required data from the redux store
   const postStatus = useSelector(getPostsStatus);
   const error = useSelector(getPostsError);
-
-  
 
   let content;
 
   if (postStatus === "loading") {
     content = <Spinner />;
   } else if (postStatus === "succeeded") {
-    const orderedPosts = posts
-      .slice()
-      .sort((a, b) => b.date.localeCompare(a.date));
-
-    content = orderedPosts.map((post) => {
-      return <PostExcerpt key={nanoid()} post={post} />;
+    content = orderedPostsIds.map((postId) => {
+      return <PostExcerpt key={postId} postId={postId} />;
     });
   } else if (postStatus === "failed") {
     content = <p>{error}</p>;

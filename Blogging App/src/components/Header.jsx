@@ -1,6 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
+import { increaseCount, getCount } from "../features/posts/postsSlice.js";
+import { useDispatch, useSelector } from "react-redux";
 
 function Header() {
+  const dispatch = useDispatch();
+  const count = useSelector(getCount);
+
   const navigate = useNavigate();
   return (
     <header className="min-w-full flex justify-between items-center p-4 bg-gray-800 text-white hover:cursor-pointer">
@@ -24,6 +29,19 @@ function Header() {
               Post
             </Link>
           </li>
+          <li>
+            <Link to="/user" className="hover:text-gray-300">
+              Users
+            </Link>
+          </li>
+          <button
+            className="bg-green rounded-lg px-2 border border-white"
+            onClick={() => {
+              dispatch(increaseCount());
+            }}
+          >
+            {count}
+          </button>
         </ul>
       </nav>
     </header>
