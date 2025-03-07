@@ -25,7 +25,7 @@ export const addNewPost = createAsyncThunk('posts/addNewPosts', async (initialPo
     return response.data;
 })
 
-export const updatePost = createAsyncThunk('posts.updatePost', async (initialPost) => {
+export const updatePost = createAsyncThunk('posts/updatePost', async (initialPost) => {
     const { id } = initialPost;
     console.log("Initial Post is : ", initialPost);
     const response = await axios.put(`${POST_URL}/${id}`, initialPost);
