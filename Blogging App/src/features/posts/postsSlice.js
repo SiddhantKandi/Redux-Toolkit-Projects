@@ -121,7 +121,7 @@ const postsSlice = createSlice({
     },
 
 });
-
+ 
 //get Selector creates these selector and we rename them with aliases using destructuring
 
 export const {
