@@ -16,7 +16,6 @@ const initialState = postsAdapter.getInitialState({
 
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
     const response = await axios.get(POST_URL);
-    console.log("Response is : ",response);
     return response.data;
 });
 
@@ -27,7 +26,6 @@ export const addNewPost = createAsyncThunk('posts/addNewPosts', async (initialPo
 
 export const updatePost = createAsyncThunk('posts/updatePost', async (initialPost) => {
     const { id } = initialPost;
-    console.log("Initial Post is : ", initialPost);
     const response = await axios.put(`${POST_URL}/${id}`, initialPost);
     return response.data;
 })
@@ -99,7 +97,6 @@ const postsSlice = createSlice({
                 },
                 postsAdapter.addOne(state,action.payload)
         }).addCase(updatePost.fulfilled, (state, action) => {
-            console.log("Action payload : ", action.payload);
             if (!action.payload?.id) {
                 console.log("Failed to update the post");
                 return;
@@ -109,7 +106,6 @@ const postsSlice = createSlice({
             postsAdapter.upsertOne(state,action.payload)
 
         }).addCase(deletePost.fulfilled, (state, action) => {
-            console.log("Action payload in delete : ".action);
             if (!action.payload?.id) {
                 console.log("Failed to delete the post");
                 return;
